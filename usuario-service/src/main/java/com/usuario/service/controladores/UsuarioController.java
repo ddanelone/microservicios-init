@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import io.micrometer.tracing.annotation.NewSpan;
+import io.micrometer.tracing.annotation.SpanTag;
+
 @RestController
 @RequestMapping("/usuario")
 public class UsuarioController {
@@ -54,6 +57,7 @@ public class UsuarioController {
 
    @CircuitBreaker(name = "autosCB", fallbackMethod = "fallbackGetAutos")
    @GetMapping("autos/{usuarioId}")
+   @NewSpan("listarAutos")
    public ResponseEntity listarAutos(@PathVariable("usuarioId") int usuarioId) {
 
       Usuario usuario = usuarioService.getById(usuarioId);
@@ -65,6 +69,7 @@ public class UsuarioController {
 
    @CircuitBreaker(name = "motosCB", fallbackMethod = "fallbackGetMotos")
    @GetMapping("motos/{usuarioId}")
+   @NewSpan("listarMotos")
    public ResponseEntity listarMotos(@PathVariable("usuarioId") int usuarioId) {
       Usuario usuario = usuarioService.getById(usuarioId);
       if (usuario == null) {
@@ -75,6 +80,7 @@ public class UsuarioController {
 
    @CircuitBreaker(name = "autosCB", fallbackMethod = "fallbackSaveAuto")
    @PostMapping("/auto/{usuarioId}")
+   @NewSpan("guardarAuto")
    public ResponseEntity<Auto> guardarAuto(@PathVariable("usuarioId") int usuarioId, @RequestBody Auto auto) {
       Auto nuevoAuto = usuarioService.saveAuto(usuarioId, auto);
       return ResponseEntity.ok(nuevoAuto);
@@ -82,6 +88,7 @@ public class UsuarioController {
 
    @CircuitBreaker(name = "motosCB", fallbackMethod = "fallbackSaveMoto")
    @PostMapping("/moto/{usuarioId}")
+   @NewSpan("guardarMoto")
    public ResponseEntity<Moto> guardarMoto(@PathVariable("usuarioId") int usuarioId, @RequestBody Moto moto) {
       Moto nuevaMoto = usuarioService.saveMoto(usuarioId, moto);
       return ResponseEntity.ok(nuevaMoto);
@@ -89,6 +96,7 @@ public class UsuarioController {
 
    @CircuitBreaker(name = "todosCB", fallbackMethod = "fallbackGetTodos")
    @GetMapping("/todos/{usuarioId}")
+   @NewSpan("listarTodosLosVehiculos")
    public ResponseEntity<Map<String, Object>> listarTodosLosVehiculos(@PathVariable("usuarioId") int usuarioId) {
       return usuarioService.getUsuariosAndVehiculos(usuarioId);
    }
@@ -108,13 +116,10 @@ public class UsuarioController {
 
    private ResponseEntity<Moto> fallbackSaveMoto(@PathVariable("usuarioId") int usuarioId, @RequestBody Moto moto,
          Throwable e) {
-      return new ResponseEntity("El usuario también fracasó como pobre respecto de las motos",
-            HttpStatus.OK);
+      return new ResponseEntity("El usuario también fracasó como pobre respecto de las motos", HttpStatus.OK);
    }
 
    private ResponseEntity<Map<String, Object>> fallbackGetTodos(@PathVariable("usuarioId") int usuarioId, Throwable e) {
-      return new ResponseEntity("No se puede recuperar los vehículos del usuario con id: " + usuarioId,
-            HttpStatus.OK);
+      return new ResponseEntity("No se puede recuperar los vehículos del usuario con id: " + usuarioId, HttpStatus.OK);
    }
-
 }
