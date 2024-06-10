@@ -1,0 +1,47 @@
+services:
+  config-service:
+    image: config-service
+    build:
+      context: ./config-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - JAR_FILE=config-service-0.0.1-SNAPSHOT.jar
+    networks:
+      - spring-cloud-net
+
+  eureka-service:
+    image: eureka-service
+    build:
+      context: ./eureka-service
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
+    depends_on:
+      - config-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - JAR_FILE=eureka-service-0.0.1-SNAPSHOT.jar
+    networks:
+      - spring-cloud-net
+
+  gateway-service:
+    image: gateway-service
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - config-service
+      - eureka-service
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - JAR_FILE=gateway-service-0.0.1-SNAPSHOT.jar
+    networks:
+      - spring-cloud-net
+
+networks:
+  spring-cloud-net:
+    driver: bridge

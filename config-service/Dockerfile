@@ -1,11 +1,38 @@
-FROM openjdk:17-jdk-alpine
+# Stage 1: Build Maven dependencies
+FROM maven:3.9.6-eclipse-temurin-17 AS dependencies
+WORKDIR /app
 
-LABEL MAINTAINER="support@diegodanelone.com.ar"
-LABEL DETALLE="Config Service debe ejecutarse primero"
+# Copy only the pom.xml file to cache dependencies
+COPY pom.xml .
 
-# Añadir el archivo JAR al contenedor
-ARG JAR_FILE
-ADD target/${JAR_FILE} /usr/share/myservice/config-service.jar
+# Run the go-offline goal to download all dependencies
+RUN mvn dependency:go-offline
 
-# Establecer el punto de entrada
-ENTRYPOINT ["java", "-jar", "/usr/share/myservice/config-service.jar"]
+# Stage 2: Build the JAR file
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+
+# Copy the cached dependencies from the first stage
+COPY --from=dependencies /root/.m2 /root/.m2
+
+# Copy the rest of the project files
+COPY . .
+
+# Build the project
+RUN mvn clean package -DskipTests
+
+
+# Stage 3: Run the JAR file
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+# Copy the built JAR file from the build stage
+COPY --from=build /app/target/*.jar /app/app.jar
+
+# Expose the port
+EXPOSE 8081
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+
+

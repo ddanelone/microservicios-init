@@ -2,3 +2,15 @@ https://www.youtube.com/watch?v=icTg6iTqpUk&ab_channel=LaTecnolog%C3%ADaAvanza
 
 tiempo: 1:56:24
 Todo ok!
+
+
+Ejecución: 
+compilar en orden:
+
+mvn clean package dockerfile:build 
+docker run -d -p 8081:8081 --name config-service diego/config-service:0.0.1-SNAPSHOT --network mi_red
+
+mvn clean package dockerfile:build 
+docker run -d -p 8761:8761 --name eureka-service diego/eureka-service:0.0.1-SNAPSHOT --network mi_red
+
+

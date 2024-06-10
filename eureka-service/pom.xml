@@ -49,8 +49,14 @@
          <version>1.4.13</version>
       </dependency>
 
-   </dependencies>
+      <dependency>
+         <groupId>javax.xml.bind</groupId>
+         <artifactId>jaxb-api</artifactId>
+         <version>2.3.1</version>
+      </dependency>
 
+
+   </dependencies>
    <dependencyManagement>
       <dependencies>
          <dependency>
@@ -62,7 +68,6 @@
          </dependency>
       </dependencies>
    </dependencyManagement>
-
    <build>
       <plugins>
          <plugin>
@@ -90,8 +95,8 @@
                   <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
                </buildArgs>
             </configuration>
-         </plugin>
 
+         </plugin>
       </plugins>
    </build>
 </project>
